@@ -55,7 +55,13 @@ export default async function Home() {
 
           <div className={styles.list}>
             {news.map((item) => {
-              const cover = item.cover_image ? assetUrl(item.cover_image) : null;
+                            const cover = item.cover_image
+                              ? assetUrl(item.cover_image, {
+                                  width: 500,
+                                  quality: 70,
+                                  fit: "cover",
+                                })
+                              : null;
 
               return (
                 <article key={item.id} className={styles.card}>
@@ -87,8 +93,13 @@ export default async function Home() {
 
           <div className={styles.featuredList}>
             {featured.map((item) => {
-              const cover = item.cover_image ? assetUrl(item.cover_image) : null;
-
+            const cover = item.cover_image
+              ? assetUrl(item.cover_image, {
+                  width: 420,
+                  quality: 70,
+                  fit: "cover",
+                })
+              : null;
               return (
                 <Link key={item.id} href={`/news/${item.slug}`} className={styles.featuredItem}>
                   <div className={styles.featuredMedia}>
@@ -121,7 +132,7 @@ export default async function Home() {
             <div className={styles.footerLabel}>Ми в соцмережах</div>
             <div className={styles.socials}>
               <a
-                href="https://instagram.com/"
+                href="https://www.instagram.com/espress_news_che/"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="Instagram"
@@ -131,7 +142,7 @@ export default async function Home() {
               </a>
 
               <a
-                href="https://www.facebook.com/share/1F3Ga9h2Xs/"
+                href="https://www.facebook.com/share/1J5z7rhvJu/"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="Facebook"
@@ -151,7 +162,7 @@ export default async function Home() {
               </a>
 
               <a
-                href="https://t.me/"
+                href="https://t.me/espressnews"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="Telegram"
