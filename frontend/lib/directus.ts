@@ -1,3 +1,10 @@
+export type Category = {
+  id: number;
+  slug: string;
+  name: string;
+  description?: string | null;
+  status?: string | null;
+};
 
 export type NewsItem = {
   id: number;
@@ -8,16 +15,12 @@ export type NewsItem = {
   published_at?: string | null;
   cover_image?: string | null;
   is_featured?: boolean | null;
+  is_hero?: boolean | null;
+  is_top?: boolean | null;
   status?: "draft" | "published" | "archived" | string | null;
-
+  category?: Category | null;
 };
 
-export type Category = {
-  description: any;
-  id: number;
-  slug: string;
-  name: string;
-};
 export type PageItem = {
   id: number | string;
   title: string;
