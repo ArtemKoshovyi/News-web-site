@@ -4,8 +4,11 @@ import { assetUrl, getNewsBySlug } from "../../../lib/directus";
 
 function formatDate(value?: string | null) {
   if (!value) return "";
-  // Добавлена настройка локали для корректного отображения даты
-  return new Date(value).toLocaleDateString("uk-UA", {
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  return date.toLocaleDateString("uk-UA", {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -14,16 +17,29 @@ function formatDate(value?: string | null) {
   });
 }
 
-export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   const resolvedParams = await params;
-  
-  const slug = resolvedParams?.slug ? decodeURIComponent(resolvedParams.slug) : null;
+  const slug = resolvedParams?.slug
+    ? decodeURIComponent(resolvedParams.slug)
+    : null;
 
   if (!slug) {
     return (
-      <div className={styles.container}>
-        <p>Адресу новини не вказано.</p>
-      </div>
+      <main className={styles.page}>
+        <section className={styles.stateBox}>
+          <Link href="/" className={styles.backLink}>
+            ← На головну
+          </Link>
+          <h1 className={styles.stateTitle}>Адресу новини не вказано</h1>
+          <p className={styles.stateText}>
+            Сторінку неможливо відкрити, тому що в URL немає slug новини.
+          </p>
+        </section>
+      </main>
     );
   }
 
@@ -31,38 +47,117 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
 
   if (!item) {
     return (
-      <div className={styles.container}>
-        <h1 className={styles.h1}>Новину не знайдено</h1>
-        <p>Запитувана сторінка "{slug}" відсутня або була видалена.</p>
-        <Link href="/" className={styles.back}>← Повернутися до списку новин</Link>
-      </div>
+      <main className={styles.page}>
+        <section className={styles.stateBox}>
+          <Link href="/" className={styles.backLink}>
+            ← На головну
+          </Link>
+          <h1 className={styles.stateTitle}>Новину не знайдено</h1>
+          <p className={styles.stateText}>
+            Запитувана сторінка “{slug}” відсутня або була видалена.
+          </p>
+        </section>
+      </main>
     );
   }
 
-  const img = assetUrl(item.cover_image);
+  const img = item.cover_image ? assetUrl(item.cover_image) : "";
+  const categoryName = item.category?.name ?? "Новини";
+  const date = formatDate(item.published_at);
 
   return (
-    <article className={styles.container}>
+    <main className={styles.page}>
+      {/* ── ARTICLE HERO ── */}
+      <section className={styles.hero}>
+        {img && (
+          <div className={styles.heroBg} aria-hidden="true">
+            <img src={img} alt="" className={styles.heroBgImg} />
+          </div>
+        )}
 
-      <header>
-        <h1 className={styles.h1}>{item.title}</h1>
-        <div className={styles.meta}>{formatDate(item.published_at)}</div>
-      </header>
+        <div className={styles.heroShade} aria-hidden="true" />
+        <div className={styles.heroShadeBottom} aria-hidden="true" />
 
-      {img && (
-        <div className={styles.imageWrapper}>
-          <img className={styles.cover} src={img} alt={item.title ?? ""} />
+        <div className={styles.heroInner}>
+          <Link href="/" className={styles.backLinkHero}>
+            ← На головну
+          </Link>
+
+          
+          <h1 className={styles.title}>{item.title}</h1>
+
+          <div className={styles.metaRow}>
+            {date && <time className={styles.date}>{date}</time>}
+            <span className={styles.metaDivider} aria-hidden="true" />
+            <span className={styles.source}>Express News Україна</span>
+          </div>
         </div>
-      )}
+      </section>
 
-      {item.excerpt && <p className={styles.excerpt}>{item.excerpt}</p>}
+      {/* ── ARTICLE BODY ── */}
+      <section className={styles.articleShell}>
+        <article className={styles.article}>
+          {img && (
+            <figure className={styles.coverWrap}>
+              <img className={styles.cover} src={img} alt={item.title ?? ""} />
+            </figure>
+          )}
 
-      <hr className={styles.divider} />
+          {item.excerpt && (
+            <p className={styles.excerpt}>{item.excerpt}</p>
+          )}
 
-      <div
-        className={styles.content}
-        dangerouslySetInnerHTML={{ __html: item.content ?? "" }}
-      />
-    </article>
+          <div className={styles.divider} />
+
+          <div
+            className={styles.content}
+            dangerouslySetInnerHTML={{ __html: item.content ?? "" }}
+          />
+        </article>
+
+        <aside className={styles.sidebar} aria-label="Інформація про матеріал">
+          <div className={styles.sideCard}>
+            <div className={styles.sideLabel}>Матеріал</div>
+
+            <dl className={styles.infoList}>
+              <div className={styles.infoItem}>
+                <dt>Категорія</dt>
+                <dd>{categoryName}</dd>
+              </div>
+
+              {date && (
+                <div className={styles.infoItem}>
+                  <dt>Опубліковано</dt>
+                  <dd>{date}</dd>
+                </div>
+              )}
+
+              <div className={styles.infoItem}>
+                <dt>Видання</dt>
+                <dd>Express News</dd>
+              </div>
+            </dl>
+          </div>
+
+          <div className={styles.newsletter}>
+            <div className={styles.newsletterTitle}>
+              Підпишіться на розсилку
+            </div>
+            <p className={styles.newsletterText}>
+              Найважливіше за день — прямо на вашу пошту. Без спаму.
+            </p>
+            <input
+              className={styles.newsletterInput}
+              type="email"
+              placeholder="ваш@email.com"
+              aria-label="Email для підписки"
+            />
+            <button type="button" className={styles.newsletterBtn}>
+              Підписатись →
+            </button>
+          </div>
+        </aside>
+      </section>
+    </main>
   );
 }

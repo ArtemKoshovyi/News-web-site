@@ -1,5 +1,5 @@
 import Link from "next/link";
-import styles from "../page.module.css";
+import styles from "./search.module.css";
 import { searchNews } from "@/lib/directus";
 
 type Props = {
@@ -12,73 +12,100 @@ export default async function SearchPage({ searchParams }: Props) {
   const results = q ? await searchNews(q) : [];
 
   return (
-    <main style={{ padding: "24px 0" }}>
-      <div className={styles.container}>
-        <h1 style={{ fontSize: 40, fontWeight: 800, marginBottom: 16 }}>Пошук</h1>
+    <main className={styles.page}>
+      <section className={styles.searchHero}>
+        <div className={styles.heroInner}>
+          <Link href="/" className={styles.backLink}>
+            ← На головну
+          </Link>
 
-        
-        <form
-          action="/search"
-          method="GET"
-          style={{ display: "flex", gap: 12, marginBottom: 24 }}
-        >
-          <input
-            name="q"
-            defaultValue={q}
-            placeholder="Введи запит, наприклад: Одеса"
-            style={{
-              flex: 1,
-              height: 44,
-              padding: "0 14px",
-              borderRadius: 10,
-              border: "1px solid var(--line)",
-              background: "var(--surface)",
-              color: "var(--ink)",
-              outline: "none",
-            }}
-          />
+      
+          <h1 className={styles.title}>Пошук новин</h1>
 
-          <button
-            type="submit"
-            style={{
-              height: 44,
-              padding: "0 16px",
-              borderRadius: 10,
-              background: "var(--ink)",
-              color: "var(--bg)",
-              border: "1px solid var(--ink)",
-              fontWeight: 700,
-              cursor: "pointer",
-              whiteSpace: "nowrap",
-            }}
-          >
-            шукати
-          </button>
-        </form>
+          <p className={styles.description}>
+            Знайдіть матеріали за ключовими словами, темами або подіями.
+          </p>
 
-        {!q && <p style={{ opacity: 0.7 }}>Введи запит, щоб знайти новини</p>}
+          <form action="/search" method="GET" className={styles.form}>
+            <input
+              name="q"
+              defaultValue={q}
+              placeholder="Введи запит, наприклад: Одеса"
+              className={styles.input}
+            />
+
+            <button type="submit" className={styles.button}>
+              Шукати
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <section className={styles.resultsShell}>
+        <div className={styles.sectionHead}>
+          <div className={styles.sectionHeadLeft}>
+            <span className={styles.sectionLabel}>Результати</span>
+            <h2 className={styles.sectionTitle}>
+              {q ? `За запитом “${q}”` : "Введіть запит"}
+            </h2>
+          </div>
+
+          {q && (
+            <span className={styles.count}>
+              {results.length} матеріалів
+            </span>
+          )}
+        </div>
+
+        {!q && (
+          <div className={styles.emptyState}>
+            <h2>Почніть пошук</h2>
+            <p>Введіть слово або фразу у поле вище, щоб знайти новини.</p>
+          </div>
+        )}
 
         {q && results.length === 0 && (
-          <p style={{ opacity: 0.7 }}>Нічого не знайдено за запитом “{q}”</p>
+          <div className={styles.emptyState}>
+            <h2>Нічого не знайдено</h2>
+            <p>За запитом “{q}” немає результатів. Спробуйте інші слова.</p>
+          </div>
         )}
 
         {results.length > 0 && (
-          <ul style={{ display: "grid", gap: 12, listStyle: "none", padding: 0 }}>
+          <div className={styles.list}>
             {results.map((item) => (
-              <li key={item.id} style={{ borderBottom: "1px solid var(--line)", paddingBottom: 12 }}>
-                <Link
-                  href={`/news/${item.slug}`}
-                  style={{ fontWeight: 800, textDecoration: "none" }}
-                >
-                  {item.title}
-                </Link>
+              <article key={item.id} className={styles.card}>
+                <div className={styles.cardBody}>
+                  <span className={styles.meta}>Express News</span>
 
-                {item.excerpt && <p style={{ marginTop: 6, opacity: 0.75 }}>{item.excerpt}</p>}
-              </li>
+                  <h3 className={styles.cardTitle}>
+                    <Link href={`/news/${item.slug}`} className={styles.cardLink}>
+                      {item.title}
+                    </Link>
+                  </h3>
+
+                  {item.excerpt && (
+                    <p className={styles.excerpt}>{item.excerpt}</p>
+                  )}
+
+                  <Link href={`/news/${item.slug}`} className={styles.readMore}>
+                    Читати матеріал
+                    <svg
+                      viewBox="0 0 12 12"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      aria-hidden="true"
+                    >
+                      <path d="M2 6h8M6 2l4 4-4 4" />
+                    </svg>
+                  </Link>
+                </div>
+              </article>
             ))}
-          </ul>
+          </div>
         )}
-      </div>
+      </section>
     </main>
   );
 }

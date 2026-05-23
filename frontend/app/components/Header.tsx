@@ -8,10 +8,9 @@ import {
   FaYoutube,
   FaTelegramPlane,
 } from "react-icons/fa";
-import { FiMenu, FiSearch, FiX } from "react-icons/fi";
-import headerStyles from "./Header.module.css";
+import { FiSearch, FiX, FiMoon, FiSun } from "react-icons/fi";
+import styles from "./Header.module.css";
 import type { Category } from "../../lib/directus";
-import { FiMoon, FiSun } from "react-icons/fi";
 
 function categoryHref(cat: Category) {
   return cat.slug ? `/category/${cat.slug}` : `/category/${cat.id}`;
@@ -25,12 +24,13 @@ export default function Header({ categories = [] }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">("light");
 
-function toggleTheme() {
-  const next = theme === "dark" ? "light" : "dark";
-  setTheme(next);
-  document.documentElement.dataset.theme = next;
-  localStorage.setItem("theme", next);
-}
+  function toggleTheme() {
+    const next = theme === "dark" ? "light" : "dark";
+    setTheme(next);
+    document.documentElement.dataset.theme = next;
+    localStorage.setItem("theme", next);
+  }
+
   const categoriesForNav = useMemo(
     () => (Array.isArray(categories) ? categories : []),
     [categories]
@@ -38,52 +38,57 @@ function toggleTheme() {
 
   return (
     <>
-      <header className={headerStyles.header}>
-        <div className={headerStyles.headerInner}>
-          {/* left side */}
-          <div className={headerStyles.leftGroup}>
+      <header className={styles.header}>
+        {/* ── TOP BAR ── */}
+        <div className={styles.headerTop}>
+          {/* Left: burger + search */}
+          <div className={styles.leftGroup}>
             <button
               type="button"
-              className={headerStyles.iconButton}
+              className={styles.menuBtn}
               aria-label="Відкрити меню"
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen(true)}
             >
-              <FiMenu />
+              <span />
+              <span />
+              <span />
             </button>
 
-            <Link
-              href="/search"
-              className={headerStyles.iconButton}
-              aria-label="Пошук"
-            >
+            <Link href="/search" className={styles.iconButton} aria-label="Пошук">
               <FiSearch />
+              Пошук
             </Link>
           </div>
 
-          {/* center logo */}
-          <div className={headerStyles.centerGroup}>
-            <Link href="/" className={headerStyles.logo} aria-label="Головна">
-              <span className={headerStyles.logoText}>Express News</span>
+          {/* Center: logo */}
+          <div className={styles.centerGroup}>
+            <span className={styles.logoEyebrow}>Незалежне видання</span>
+            <Link href="/" className={styles.logo} aria-label="Головна">
+              Express News
             </Link>
+            <div className={styles.logoRule}>
+              <span className={styles.logoRuleText}>Україна</span>
+            </div>
           </div>
 
-          {/* right side socials */}
-          <div className={headerStyles.rightGroup}>
+          {/* Right: theme + socials */}
+          <div className={styles.rightGroup}>
             <button
               type="button"
-              aria-label="Toggle theme"
-              className={headerStyles.iconButton}
+              aria-label="Змінити тему"
+              className={styles.themeBtn}
               onClick={toggleTheme}
             >
               {theme === "dark" ? <FiSun /> : <FiMoon />}
             </button>
+
             <a
               href="https://www.facebook.com/share/1J5z7rhvJu/"
               target="_blank"
               rel="noreferrer"
               aria-label="Facebook"
-              className={headerStyles.socialLink}
+              className={styles.socialLink}
             >
               <FaFacebookF />
             </a>
@@ -93,7 +98,7 @@ function toggleTheme() {
               target="_blank"
               rel="noreferrer"
               aria-label="Instagram"
-              className={headerStyles.socialLink}
+              className={styles.socialLink}
             >
               <FaInstagram />
             </a>
@@ -103,7 +108,7 @@ function toggleTheme() {
               target="_blank"
               rel="noreferrer"
               aria-label="Telegram"
-              className={headerStyles.socialLink}
+              className={styles.socialLink}
             >
               <FaTelegramPlane />
             </a>
@@ -113,36 +118,64 @@ function toggleTheme() {
               target="_blank"
               rel="noreferrer"
               aria-label="YouTube"
-              className={headerStyles.socialLink}
+              className={styles.socialLink}
             >
               <FaYoutube />
             </a>
           </div>
         </div>
+
+        {/* ── NAV STRIP ── */}
+        <nav className={styles.navStrip} aria-label="Категорії">
+          <Link href="/" className={`${styles.navLink} ${styles.active}`}>
+            Головна
+          </Link>
+
+          {categoriesForNav.map((cat) => (
+            <Link
+              key={cat.id}
+              href={categoryHref(cat)}
+              className={styles.navLink}
+            >
+              {cat.name}
+            </Link>
+          ))}
+
+          <Link href="/about" className={styles.navLink}>
+            Про нас
+          </Link>
+        </nav>
       </header>
 
+      {/* ── OVERLAY ── */}
       <div
-        className={`${headerStyles.overlay} ${
-          menuOpen ? headerStyles.overlayOpen : ""
-        }`}
+        className={`${styles.overlay} ${menuOpen ? styles.overlayOpen : ""}`}
         onClick={() => setMenuOpen(false)}
+        aria-hidden="true"
       />
 
+      {/* ── SIDE MENU ── */}
       <aside
-        className={`${headerStyles.sideMenu} ${
-          menuOpen ? headerStyles.sideMenuOpen : ""
-        }`}
+        className={`${styles.sideMenu} ${menuOpen ? styles.sideMenuOpen : ""}`}
+        aria-label="Головне меню"
       >
-        
-        <div className={headerStyles.sideMenuHeader}>
-            <span className={headerStyles.menuLogo}>EXPRESS NEWS</span>
+        <div className={styles.sideMenuHeader}>
+          <span className={styles.menuLogo}>Express News</span>
 
+          <button
+            type="button"
+            className={styles.closeButton}
+            aria-label="Закрити меню"
+            onClick={() => setMenuOpen(false)}
+          >
+            <FiX />
+          </button>
         </div>
 
-        <nav className={headerStyles.sideNav} aria-label="Категорії">
+        <nav className={styles.sideNav} aria-label="Навігація">
           <Link
             href="/"
-            className={headerStyles.sideNavLink}
+            className={styles.sideNavLink}
             onClick={() => setMenuOpen(false)}
           >
             Головна
@@ -152,7 +185,7 @@ function toggleTheme() {
             <Link
               key={cat.id}
               href={categoryHref(cat)}
-              className={headerStyles.sideNavLink}
+              className={styles.sideNavLink}
               onClick={() => setMenuOpen(false)}
             >
               {cat.name}
@@ -161,7 +194,7 @@ function toggleTheme() {
 
           <Link
             href="/about"
-            className={headerStyles.sideNavLink}
+            className={styles.sideNavLink}
             onClick={() => setMenuOpen(false)}
           >
             Про нас

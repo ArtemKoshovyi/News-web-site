@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import styles from "../page.module.css";
-import { assetUrl, type NewsItem } from "../../lib/directus";
 import Image from "next/image";
+import { useMemo, useState } from "react";
+import { assetUrl, type NewsItem } from "../../lib/directus";
+import styles from "./HomeHero.module.css";
 
 const DATE_LOCALE = "uk-UA";
 
@@ -23,74 +23,98 @@ type Props = {
 export default function HomeHero({ hero, topList }: Props) {
   const candidates = useMemo(() => {
     const list: NewsItem[] = [];
-
     if (hero) list.push(hero);
-
     for (const item of topList) {
       if (!list.some((x) => x.slug === item.slug)) list.push(item);
     }
-
-    // показуємо в hero тільки ті, де є cover_image
     return list.filter((x) => !!x.cover_image);
   }, [hero, topList]);
 
   const [selectedSlug, setSelectedSlug] = useState(() => candidates[0]?.slug ?? "");
 
-  const selected = useMemo(() => {
-    return candidates.find((x) => x.slug === selectedSlug) ?? candidates[0] ?? null;
-  }, [candidates, selectedSlug]);
+  const selected = useMemo(
+    () => candidates.find((x) => x.slug === selectedSlug) ?? candidates[0] ?? null,
+    [candidates, selectedSlug]
+  );
 
   if (!selected) return null;
 
   const bg = selected.cover_image ? assetUrl(String(selected.cover_image)) : "";
 
   return (
-    <section className={styles.heroFull} aria-label="Головна новина">
+    <section className={styles.hero} aria-label="Головна новина">
+      {/* Background image */}
       <div className={styles.heroBg}>
-  <Image
-    src={bg}
-    alt={selected.title}
-    fill
-    priority
-    unoptimized
-    className={styles.heroBgImage}
-    sizes="100vw"
-  />
-</div>
+        {bg && (
+          <Image
+            src={bg}
+            alt={selected.title}
+            fill
+            priority
+            unoptimized
+            className={styles.heroBgImg}
+            sizes="100vw"
+          />
+        )}
+      </div>
+
+      {/* Overlays */}
       <div className={styles.heroShade} aria-hidden="true" />
+      <div className={styles.heroShadeBottom} aria-hidden="true" />
 
-      <div className={styles.container}>
-        <div className={styles.heroContent}>
-          <div className={styles.heroLeft}>
-            <div className={styles.heroKicker}>{formatDate(selected.published_at)}</div>
-
-            <Link href={`/news/${selected.slug}`} className={styles.heroH1}>
-              {selected.title}
-            </Link>
+      <div className={styles.heroInner}>
+        {/* Left: main headline */}
+        <div className={styles.heroMain}>
+          <div className={styles.heroLabel}>
+            <span className={styles.heroLabelDot} aria-hidden="true" />
+            <span className={styles.heroLabelText}>
+              Актуально зараз · {formatDate(selected.published_at)}
+            </span>
           </div>
 
-          <div className={styles.heroRight} aria-label="Обрати головне фото">
-            <div className={styles.heroPickerTitle}>Головні новини</div>
+          <Link href={`/news/${selected.slug}`} className={styles.heroTitle}>
+            {selected.title}
+          </Link>
 
-            <div className={styles.heroPickerList}>
-              {candidates.slice(0, 6).map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  className={`${styles.heroPickBtn} ${
-                    item.slug === selected.slug ? styles.heroPickBtnActive : ""
-                  }`}
-                  onClick={() => setSelectedSlug(item.slug)}
-                >
-                  <span className={styles.heroPickTitle}>{item.title}</span>
-                  <span className={styles.heroPickMeta}>{formatDate(item.published_at)}</span>
-                </button>
-              ))}
-            </div>
-
-            <Link href="/events" className={styles.eventsCta}>
-              Меню заходів
+          <div className={styles.heroMeta}>
+            <span className={styles.heroDate}>{formatDate(selected.published_at)}</span>
+            <Link href={`/news/${selected.slug}`} className={styles.heroReadBtn}>
+              Читати
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+                <path d="M2 6h8M6 2l4 4-4 4" />
+              </svg>
             </Link>
+          </div>
+        </div>
+
+        {/* Right: news picker */}
+        <div className={styles.heroPicker} aria-label="Топ новини">
+          <div className={styles.pickerHeader}>
+            <span className={styles.pickerTitle}>Топ новини</span>
+            <span className={styles.pickerCount}>{Math.min(candidates.length, 6)} матеріалів</span>
+          </div>
+
+          <div className={styles.pickerList}>
+            {candidates.slice(0, 6).map((item, i) => (
+              <button
+                key={item.id}
+                type="button"
+                className={`${styles.pickerItem} ${
+                  item.slug === selected.slug ? styles.pickerItemActive : ""
+                }`}
+                onClick={() => setSelectedSlug(item.slug)}
+              >
+                <span className={styles.pickerNum}>
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <div className={styles.pickerInfo}>
+                  <span className={styles.pickerItemTitle}>{item.title}</span>
+                  <span className={styles.pickerItemDate}>
+                    {formatDate(item.published_at)}
+                  </span>
+                </div>
+              </button>
+            ))}
           </div>
         </div>
       </div>

@@ -1,15 +1,34 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import styles from "../../page.module.css";
-import { assetUrl, getNewsByCategory, getCategoryBySlug, type NewsItem } from "@/lib/directus";
-import Header from "../../components/Header";
-import { getCategories } from "@/lib/directus";
+import styles from "./category.module.css";
+import {
+  assetUrl,
+  getNewsByCategory,
+  getCategoryBySlug,
+  type NewsItem,
+} from "@/lib/directus";
 
 function formatUkDate(value?: string | null) {
   if (!value) return "";
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleDateString("uk-UA", { day: "2-digit", month: "long" });
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  return date.toLocaleDateString("uk-UA", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+function getReadTime(content?: string | null) {
+  if (!content) return "2 хв читання";
+
+  const cleanText = content.replace(/<[^>]*>/g, " ").trim();
+  const words = cleanText.split(/\s+/).filter(Boolean).length;
+  const minutes = Math.max(1, Math.ceil(words / 220));
+
+  return `${minutes} хв читання`;
 }
 
 export default async function CategoryPage({
@@ -17,12 +36,10 @@ export default async function CategoryPage({
 }: {
   params: Promise<{ slug: string }> | { slug: string };
 }) {
-  // safe resolve params (covers some edge cases / different next versions)
   const resolvedParams = params instanceof Promise ? await params : params;
   const slug = decodeURIComponent(resolvedParams.slug);
 
   const category = await getCategoryBySlug(slug);
-  const categories = await getCategories();
 
   if (!category) {
     notFound();
@@ -30,106 +47,171 @@ export default async function CategoryPage({
 
   const news = await getNewsByCategory(slug);
 
-  // sidebar: take a few items with images first, then fall back to any
   const sidebarItems =
-    news.filter((n) => !!n.cover_image).slice(0, 5).length > 0
-      ? news.filter((n) => !!n.cover_image).slice(0, 5)
+    news.filter((item) => !!item.cover_image).slice(0, 5).length > 0
+      ? news.filter((item) => !!item.cover_image).slice(0, 5)
       : news.slice(0, 5);
 
   return (
-    <div className={styles.page}>
     <main className={styles.page}>
-      <div className={styles.container}>
-        <nav className={styles.breadcrumbs} aria-label="breadcrumbs">
-        
-        </nav>
+      {/* ── CATEGORY HERO ── */}
+      <section className={styles.categoryHero}>
+        <div className={styles.categoryHeroInner}>
+          <Link href="/" className={styles.backLink}>
+            ← На головну
+          </Link>
 
-        <header className={styles.categoryHero}>
+          
           <h1 className={styles.categoryTitle}>{category.name}</h1>
+
           {category.description ? (
             <p className={styles.categoryDesc}>{category.description}</p>
-          ) : null}
-        </header>
-      </div>
-
-      <div className={styles.main}>
-        <section className={styles.feed}>
-
-          {news.length === 0 ? (
-            <div className={styles.emptyState}>
-              <p>У цій категорії поки немає новин</p>
-              <p className={styles.emptyHint}>
-                перевір у directus: у новин має бути вибрана ця категорія і статус published
-              </p>
-            </div>
           ) : (
-            <div className={styles.list}>
-              {news.map((item: NewsItem) => {
-                const dateLabel = formatUkDate((item as any).published_at);
-                return (
-                  <article key={item.id} className={styles.card}>
-                    <div className={styles.cardBody}>
-                      {dateLabel ? <span className={styles.meta}>{dateLabel}</span> : null}
-
-                      <h3 className={styles.title}>
-                        <Link className={styles.titleLink} href={`/news/${item.slug}`}>
-                          {item.title}
-                        </Link>
-                      </h3>
-
-                      {item.excerpt ? <p className={styles.excerpt}>{item.excerpt}</p> : null}
-                    </div>
-
-                    {item.cover_image ? (
-                      <div className={styles.cardMedia}>
-                        <img
-                          className={styles.cardImg}
-                          src={assetUrl(item.cover_image) || ""}
-                          alt=""
-                          loading="lazy"
-                        />
-                      </div>
-                    ) : (
-                      <div className={styles.cardMedia} aria-hidden="true" />
-                    )}
-                  </article>
-                );
-              })}
-            </div>
+            <p className={styles.categoryDesc}>
+              Останні матеріали, аналітика та головні події в розділі “{category.name}”.
+            </p>
           )}
-        </section>
 
-        <aside className={styles.sidebar}>
-          <h3 className={styles.sidebarTitle}>важливо</h3>
-
-          <div className={styles.featuredList}>
-            {sidebarItems.map((item: NewsItem) => {
-              const dateLabel = formatUkDate((item as any).published_at);
-              return (
-                <Link key={item.id} className={styles.featuredItem} href={`/news/${item.slug}`}>
-                  <div className={styles.featuredMedia}>
-                    {item.cover_image ? (
-                      <img
-                        className={styles.featuredImg}
-                        src={assetUrl(item.cover_image) || ""}
-                        alt=""
-                        loading="lazy"
-                      />
-                    ) : null}
-
-                    <div className={styles.featuredOverlay}>
-                      {dateLabel ? <span className={styles.featuredTime}>{dateLabel}</span> : null}
-                      <span className={styles.featuredTitle}>{item.title}</span>
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
+          <div className={styles.categoryMeta}>
+            <span>{news.length} матеріалів</span>
+            <span className={styles.metaDivider} aria-hidden="true" />
+            <span>Express News Україна</span>
           </div>
-        </aside>
-      </div>
-    </main>
-   </div>
+        </div>
+      </section>
 
+      {/* ── CONTENT ── */}
+      <section className={styles.contentShell}>
+        <div className={styles.sectionHead}>
+          <div className={styles.sectionHeadLeft}>
+            <span className={styles.sectionLabel}>Новини</span>
+            <h2 className={styles.sectionTitle}>Останнє в категорії</h2>
+          </div>
+        </div>
+
+        <div className={styles.contentGrid}>
+          <section className={styles.feed} aria-label={`Новини категорії ${category.name}`}>
+            {news.length === 0 ? (
+              <div className={styles.emptyState}>
+                <h2>У цій категорії поки немає новин</h2>
+                <p className={styles.emptyHint}>
+                  Перевір у Directus: у новин має бути вибрана ця категорія і статус published.
+                </p>
+              </div>
+            ) : (
+              <div className={styles.list}>
+                {news.map((item: NewsItem) => {
+                  const dateLabel = formatUkDate(item.published_at);
+                  const cover = item.cover_image ? assetUrl(item.cover_image) : "";
+
+                  return (
+                    <article key={item.id} className={styles.card}>
+                      <div className={styles.cardBody}>
+                        <div className={styles.cardTopline}>
+                          {dateLabel ? (
+                            <time className={styles.meta}>{dateLabel}</time>
+                          ) : null}
+                          <span className={styles.cardReadTime}>
+                            {getReadTime(item.content)}
+                          </span>
+                        </div>
+
+                        <h3 className={styles.title}>
+                          <Link className={styles.titleLink} href={`/news/${item.slug}`}>
+                            {item.title}
+                          </Link>
+                        </h3>
+
+                        {item.excerpt ? (
+                          <p className={styles.excerpt}>{item.excerpt}</p>
+                        ) : null}
+
+                        <Link className={styles.readMore} href={`/news/${item.slug}`}>
+                          Читати матеріал
+                          <svg
+                            viewBox="0 0 12 12"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            aria-hidden="true"
+                          >
+                            <path d="M2 6h8M6 2l4 4-4 4" />
+                          </svg>
+                        </Link>
+                      </div>
+
+                      {cover ? (
+                        <Link
+                          href={`/news/${item.slug}`}
+                          className={styles.cardMedia}
+                          aria-label={item.title}
+                        >
+                          <img
+                            className={styles.cardImg}
+                            src={cover}
+                            alt=""
+                            loading="lazy"
+                          />
+                        </Link>
+                      ) : (
+                        <div className={styles.cardMedia} aria-hidden="true" />
+                      )}
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+
+          <aside className={styles.sidebar} aria-label="Важливо">
+            <div className={styles.sidebarSection}>
+              <h3 className={styles.sidebarTitle}>Важливо</h3>
+
+              <div className={styles.featuredList}>
+                {sidebarItems.map((item: NewsItem, index) => {
+                  const dateLabel = formatUkDate(item.published_at);
+
+                  return (
+                    <Link
+                      key={item.id}
+                      className={styles.featuredItem}
+                      href={`/news/${item.slug}`}
+                    >
+                      <span className={styles.featuredNum}>
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+
+                      <div className={styles.featuredInfo}>
+                        <span className={styles.featuredCat}>{category.name}</span>
+                        <span className={styles.featuredTitle}>{item.title}</span>
+                        {dateLabel ? (
+                          <span className={styles.featuredDate}>{dateLabel}</span>
+                        ) : null}
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className={styles.newsletter}>
+              <div className={styles.newsletterTitle}>Підпишіться на розсилку</div>
+              <p className={styles.newsletterText}>
+                Найважливіше за день — прямо на вашу пошту. Без спаму.
+              </p>
+              <input
+                className={styles.newsletterInput}
+                type="email"
+                placeholder="ваш@email.com"
+                aria-label="Email для підписки"
+              />
+              <button type="button" className={styles.newsletterBtn}>
+                Підписатись →
+              </button>
+            </div>
+          </aside>
+        </div>
+      </section>
+    </main>
   );
 }
