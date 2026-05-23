@@ -116,15 +116,6 @@ export default async function Home() {
                 return (
                   <article key={item.id} className={styles.card}>
                     <div className={styles.cardBody}>
-                      {/* Category */}
-                      {item.category?.name && (
-                        <Link
-                          href={item.category ? categoryHref(item.category) : "#"}
-                          className={styles.meta}
-                        >
-                          {item.category.name}
-                        </Link>
-                      )}
 
                       {/* Title */}
                       <h2 className={styles.title}>
