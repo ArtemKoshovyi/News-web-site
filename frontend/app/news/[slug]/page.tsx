@@ -62,7 +62,7 @@ export default async function Page({
   }
 
   const img = item.cover_image ? assetUrl(item.cover_image) : "";
-  const categoryName = item.category?.name ?? "Новини";
+  const categoryName = "Новини";
   const date = formatDate(item.published_at);
 
   return (
