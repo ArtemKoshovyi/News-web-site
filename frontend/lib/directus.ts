@@ -7,6 +7,7 @@ export type NewsItem = {
   content?: string | null;
   published_at?: string | null;
   cover_image?: string | null;
+  category?: Category | null;
   is_featured?: boolean | null;
   status?: "draft" | "published" | "archived" | string | null;
 
