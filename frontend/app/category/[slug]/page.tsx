@@ -84,7 +84,7 @@ export default async function CategoryPage({
       <section className={styles.contentShell}>
         <div className={styles.sectionHead}>
           <div className={styles.sectionHeadLeft}>
-            <span className={styles.sectionLabel}>Новини</span>
+            <span className={styles.sectionLabel}>{category.name}</span>
             <h2 className={styles.sectionTitle}>Останнє в категорії</h2>
           </div>
         </div>
@@ -195,19 +195,18 @@ export default async function CategoryPage({
             </div>
 
             <div className={styles.newsletter}>
-              <div className={styles.newsletterTitle}>Підпишіться на розсилку</div>
+              <div className={styles.newsletterTitle}>Підпишіться на нас у Facebook</div>
               <p className={styles.newsletterText}>
-                Найважливіше за день — прямо на вашу пошту. Без спаму.
+                Слідкуйте за новинами, оновленнями та важливими матеріалами на нашій сторінці.
               </p>
-              <input
-                className={styles.newsletterInput}
-                type="email"
-                placeholder="ваш@email.com"
-                aria-label="Email для підписки"
-              />
-              <button type="button" className={styles.newsletterBtn}>
-                Підписатись →
-              </button>
+              <a
+                className={styles.newsletterBtn}
+                href="https://www.facebook.com/"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Перейти у Facebook →
+              </a>
             </div>
           </aside>
         </div>
