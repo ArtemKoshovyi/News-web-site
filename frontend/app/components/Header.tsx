@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   FaInstagram,
   FaFacebookF,
@@ -23,6 +23,18 @@ type Props = {
 export default function Header({ categories = [] }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">("light");
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    const currentTheme = savedTheme === "dark" ? "dark" : "light";
+
+    setTheme(currentTheme);
+    document.documentElement.dataset.theme = currentTheme;
+
+    if (savedTheme !== "dark" && savedTheme !== "light") {
+      localStorage.setItem("theme", "light");
+    }
+  }, []);
 
   function toggleTheme() {
     const next = theme === "dark" ? "light" : "dark";

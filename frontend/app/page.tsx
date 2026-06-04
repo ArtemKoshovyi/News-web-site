@@ -31,14 +31,16 @@ function categoryHref(cat: Category) {
   return cat.slug ? `/category/${cat.slug}` : `/category/${cat.id}`;
 }
 
-// Ticker headlines — can be replaced with a real API call later
-const TICKER_ITEMS = [
-  "Верховна Рада проголосувала за новий закон",
-  "НБУ підвищив облікову ставку",
-  "Ситуація на фронті залишається напруженою",
-  "Президент підписав указ про нагороди",
-  "Економіка зросла на 3.2% у першому кварталі",
-];
+function getRandomItems<T>(items: T[], count: number): T[] {
+  const copy = [...items];
+
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+
+  return copy.slice(0, count);
+}
 
 export default async function Home() {
   const [newsRaw, heroRaw, topNewsRaw, featuredRaw, categoriesRaw] =
@@ -58,8 +60,17 @@ export default async function Home() {
     ? categoriesRaw
     : [];
 
-  // Duplicate ticker items for seamless loop
-  const tickerItems = [...TICKER_ITEMS, ...TICKER_ITEMS];
+  // Беремо останні 10 новин, перемішуємо їх і показуємо 5 випадкових у бігучій стрічці
+  const latestTenNews = news
+    .filter((item) => item.title && item.slug)
+    .slice(0, 10);
+  const selectedTickerNews = getRandomItems(
+    latestTenNews,
+    Math.min(5, latestTenNews.length)
+  );
+
+  // Дублюємо елементи, щоб анімація бігучої стрічки йшла без різкого обриву
+  const tickerItems = [...selectedTickerNews, ...selectedTickerNews];
 
   return (
     <div className={styles.page}>
@@ -76,9 +87,13 @@ export default async function Home() {
         <div className={styles.tickerTrack}>
           <div className={styles.tickerContent}>
             {tickerItems.map((item, i) => (
-              <span key={i} className={styles.tickerItem}>
-                {item}
-              </span>
+              <Link
+                key={`${item.id}-${i}`}
+                href={`/news/${item.slug}`}
+                className={styles.tickerItem}
+              >
+                {item.title}
+              </Link>
             ))}
           </div>
         </div>
@@ -188,24 +203,23 @@ export default async function Home() {
               </div>
             </div>
 
-            {/* Newsletter */}
+            {/* Facebook follow */}
             <div className={styles.sidebarSection}>
-              <div className={styles.newsletter}>
-                <div className={styles.newsletterTitle}>
-                  Підпишіться на розсилку
+              <div className={styles.facebookBox}>
+                <div className={styles.facebookTitle}>
+                  Підпишіться на нас у Facebook
                 </div>
-                <p className={styles.newsletterText}>
-                  Найважливіше за день — прямо на вашу пошту. Без спаму.
+                <p className={styles.facebookText}>
+                  Слідкуйте за новинами, оновленнями та важливими матеріалами на нашій сторінці.
                 </p>
-                <input
-                  className={styles.newsletterInput}
-                  type="email"
-                  placeholder="ваш@email.com"
-                  aria-label="Email для підписки"
-                />
-                <button type="button" className={styles.newsletterBtn}>
-                  Підписатись →
-                </button>
+                <a
+                  href="https://www.facebook.com/share/1J5z7rhvJu/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className={styles.facebookBtn}
+                >
+                  Перейти у Facebook →
+                </a>
               </div>
             </div>
           </aside>

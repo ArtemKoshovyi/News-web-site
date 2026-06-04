@@ -463,70 +463,55 @@
   font-weight: 600;
 }
 
-/* Newsletter box */
+/* Facebook follow box */
 
-.newsletter {
-  background: var(--ink);
-  color: #fff;
+.facebookBox {
   padding: 22px 20px;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
   border-radius: 4px;
 }
 
-.newsletterTitle {
+.facebookTitle {
+  margin: 0 0 10px;
   font-family: var(--ff-display);
   font-size: 19px;
-  font-weight: 700;
-  margin: 0 0 8px;
   line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--ink);
 }
 
-.newsletterText {
+.facebookText {
+  margin: 0 0 18px;
+  color: var(--muted);
   font-size: 13px;
-  line-height: 1.55;
-  color: rgba(255, 255, 255, 0.55);
-  margin: 0 0 16px;
+  line-height: 1.6;
 }
 
-.newsletterInput {
+.facebookBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
-  padding: 10px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  min-height: 44px;
+  padding: 11px 14px;
   border-radius: 3px;
-  background: rgba(255, 255, 255, 0.07);
-  color: #fff;
-  font-size: 13px;
-  font-family: var(--ff-body);
-  margin-bottom: 8px;
-  outline: none;
-  transition: border-color 0.15s ease;
-}
-
-.newsletterInput::placeholder {
-  color: rgba(255, 255, 255, 0.28);
-}
-
-.newsletterInput:focus {
-  border-color: rgba(255, 255, 255, 0.38);
-}
-
-.newsletterBtn {
-  width: 100%;
-  padding: 10px;
   background: var(--accent);
   color: #fff;
-  border: none;
-  border-radius: 3px;
+  text-decoration: none;
   font-size: 12px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  font-weight: 700;
+  font-weight: 800;
   font-family: var(--ff-body);
-  cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background 0.15s ease, transform 0.1s ease;
 }
 
-.newsletterBtn:hover {
+.facebookBtn:hover {
   background: var(--accent2);
+  transform: translateY(-1px);
 }
 
 /* ── EMPTY / ERROR STATE ── */
@@ -616,7 +601,7 @@
   }
 
   .sideCard,
-  .newsletter {
+  .facebookBox {
     margin-bottom: 0;
   }
 }

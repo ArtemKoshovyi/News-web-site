@@ -99,7 +99,7 @@ async function fetchItems<T>(
 
 export async function getNewsList(): Promise<NewsItem[]> {
   return fetchItems<NewsItem>(NEWS_COLLECTION, {
-    fields: "id,title,slug,excerpt,published_at,cover_image,status",
+    fields: "id,title,slug,excerpt,published_at,cover_image,status,category.id,category.slug,category.name",
     "filter[status][_eq]": "published",
     sort: "-published_at",
     limit: "20",
@@ -107,7 +107,7 @@ export async function getNewsList(): Promise<NewsItem[]> {
 }
 export async function getFeaturedNews(): Promise<NewsItem[]> {
   return fetchItems<NewsItem>(NEWS_COLLECTION, {
-    fields: "id,title,slug,published_at,cover_image,status",
+    fields: "id,title,slug,published_at,cover_image,status,category.id,category.slug,category.name",
     "filter[is_featured][_eq]": "true",
     "filter[status][_eq]": "published",
     sort: "-published_at",
@@ -116,7 +116,7 @@ export async function getFeaturedNews(): Promise<NewsItem[]> {
 }
 export async function getNewsBySlug(slug: string): Promise<NewsItem | null> {
   const items = await fetchItems<NewsItem>(NEWS_COLLECTION, {
-    fields: "id,title,slug,excerpt,content,published_at,cover_image,status",
+    fields: "id,title,slug,excerpt,content,published_at,cover_image,status,category.id,category.slug,category.name",
     "filter[slug][_eq]": slug,
     "filter[status][_eq]": "published",
     limit: "1",
@@ -171,7 +171,7 @@ export async function searchNews(query: string): Promise<NewsItem[]> {
 
   // беремо пачку новин без фільтра з бази
   const items = await fetchItems<NewsItem>(NEWS_COLLECTION, {
-  fields: "id,title,slug,excerpt,content,published_at,cover_image,status",
+  fields: "id,title,slug,excerpt,content,published_at,cover_image,status,category.id,category.slug,category.name",
   "filter[status][_eq]": "published",
   sort: "-published_at",
   limit: "200",

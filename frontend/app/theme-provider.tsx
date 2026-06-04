@@ -9,9 +9,12 @@ export default function ThemeProvider({
 }) {
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
+    const theme = savedTheme === "dark" ? "dark" : "light";
 
-    if (savedTheme === "dark" || savedTheme === "light") {
-      document.documentElement.dataset.theme = savedTheme;
+    document.documentElement.dataset.theme = theme;
+
+    if (savedTheme !== "dark" && savedTheme !== "light") {
+      localStorage.setItem("theme", "light");
     }
   }, []);
 

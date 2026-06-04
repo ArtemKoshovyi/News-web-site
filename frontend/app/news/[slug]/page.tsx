@@ -139,22 +139,21 @@ export default async function Page({
             </dl>
           </div>
 
-          <div className={styles.newsletter}>
-            <div className={styles.newsletterTitle}>
-              Підпишіться на розсилку
+          <div className={styles.facebookBox}>
+            <div className={styles.facebookTitle}>
+              Підпишіться на нас у Facebook
             </div>
-            <p className={styles.newsletterText}>
-              Найважливіше за день — прямо на вашу пошту. Без спаму.
+            <p className={styles.facebookText}>
+              Слідкуйте за новинами, оновленнями та важливими матеріалами на нашій сторінці.
             </p>
-            <input
-              className={styles.newsletterInput}
-              type="email"
-              placeholder="ваш@email.com"
-              aria-label="Email для підписки"
-            />
-            <button type="button" className={styles.newsletterBtn}>
-              Підписатись →
-            </button>
+            <a
+              href="https://www.facebook.com/share/1J5z7rhvJu/"
+              target="_blank"
+              rel="noreferrer"
+              className={styles.facebookBtn}
+            >
+              Перейти у Facebook →
+            </a>
           </div>
         </aside>
       </section>

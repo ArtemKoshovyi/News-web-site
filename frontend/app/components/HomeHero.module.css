@@ -4,9 +4,9 @@
 
 .hero {
   position: relative;
-  background: #0a0a0a;
+  background: #181818;
   overflow: hidden;
-  min-height: 520px;
+  min-height: 460px;
   display: flex;
   align-items: flex-end;
 }
@@ -28,16 +28,16 @@
   inset: 0;
   background: linear-gradient(
     to right,
-    rgba(0, 0, 0, 0.88) 0%,
-    rgba(0, 0, 0, 0.55) 55%,
-    rgba(0, 0, 0, 0.2) 100%
+    rgba(0, 0, 0, 0.62) 0%,
+    rgba(0, 0, 0, 0.32) 55%,
+    rgba(0, 0, 0, 0.08) 100%
   );
 }
 
 .heroShadeBottom {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, transparent 50%);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.38) 0%, transparent 52%);
 }
 
 /* ── INNER GRID ── */

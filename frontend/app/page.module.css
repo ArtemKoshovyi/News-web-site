@@ -406,79 +406,77 @@
   display: block;
 }
 
-/* Newsletter box */
+/* Facebook follow box */
 
-.newsletter {
-  background: var(--ink);
-  color: #fff;
+.facebookBox {
   padding: 22px 20px;
-  border-radius: 3px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--ink);
 }
 
-.newsletterTitle {
+.facebookTitle {
   font-family: var(--ff-display);
   font-size: 18px;
   font-weight: 700;
   margin: 0 0 8px;
   line-height: 1.2;
+  color: var(--ink);
 }
 
-.newsletterText {
+.facebookText {
   font-size: 13px;
   line-height: 1.55;
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--muted);
   margin: 0 0 16px;
 }
 
-.newsletterInput {
+.facebookBtn {
   width: 100%;
-  padding: 10px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 3px;
-  background: rgba(255, 255, 255, 0.07);
-  color: #fff;
-  font-size: 13px;
-  font-family: var(--ff-body);
-  margin-bottom: 8px;
-  outline: none;
-  transition: border-color 0.15s ease;
-}
-
-.newsletterInput::placeholder {
-  color: rgba(255, 255, 255, 0.28);
-}
-
-.newsletterInput:focus {
-  border-color: rgba(255, 255, 255, 0.38);
-}
-
-.newsletterBtn {
-  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 10px;
   background: var(--accent);
   color: #fff;
-  border: none;
   border-radius: 3px;
   font-size: 12px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   font-weight: 700;
   font-family: var(--ff-body);
-  cursor: pointer;
-  transition: background 0.15s ease;
+  text-decoration: none;
+  transition: background 0.15s ease, transform 0.15s ease;
 }
 
-.newsletterBtn:hover {
+.facebookBtn:hover {
   background: var(--accent2);
+  transform: translateY(-1px);
+}
+
+:global(html[data-theme="dark"]) .facebookBox {
+  background: #1a1a1a;
+  border-color: #2a2a2a;
+  color: #f0ede8;
+}
+
+:global(html[data-theme="dark"]) .facebookTitle {
+  color: #f0ede8;
+}
+
+:global(html[data-theme="dark"]) .facebookText {
+  color: #9a9a9a;
 }
 
 /* ── FOOTER ── */
 
 .footer {
   margin-top: 64px;
-  background: var(--ink);
-  color: rgba(255, 255, 255, 0.5);
+  background: var(--surface);
+  color: var(--muted);
   font-family: var(--ff-body);
+  border-top: 1px solid var(--line);
 }
 
 .footerInner {
@@ -497,7 +495,7 @@
   font-family: var(--ff-display);
   font-size: 22px;
   font-weight: 900;
-  color: #fff;
+  color: var(--ink);
   letter-spacing: -0.01em;
   display: block;
   margin-bottom: 4px;
@@ -505,7 +503,7 @@
 
 .footerNote {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.28);
+  color: var(--muted);
 }
 
 .footerCenter {
@@ -520,13 +518,13 @@
   letter-spacing: 0.07em;
   text-transform: uppercase;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.38);
+  color: var(--muted);
   text-decoration: none;
   transition: color 0.15s ease;
 }
 
 .footerLink:hover {
-  color: #fff;
+  color: var(--accent);
 }
 
 .footerRight {}
@@ -542,18 +540,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--line);
   border-radius: 3px;
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--muted);
+  background: var(--surface);
   text-decoration: none;
   font-size: 14px;
   transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .socialLink:hover {
-  background: rgba(255, 255, 255, 0.07);
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.22);
+  background: var(--warm);
+  color: var(--accent);
+  border-color: rgba(192, 57, 43, 0.35);
 }
 
 .socialLink svg {
@@ -563,7 +562,7 @@
 
 .footerDivider {
   height: 1px;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--line);
 }
 
 .footerBottom {
@@ -573,8 +572,44 @@
   display: flex;
   justify-content: space-between;
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.22);
+  color: var(--muted);
   gap: 16px;
+}
+
+:global(html[data-theme="dark"]) .footer {
+  background: #050505;
+  color: rgba(255, 255, 255, 0.5);
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+:global(html[data-theme="dark"]) .footerBrandName {
+  color: #fff;
+}
+
+:global(html[data-theme="dark"]) .footerNote,
+:global(html[data-theme="dark"]) .footerLink,
+:global(html[data-theme="dark"]) .footerBottom {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+:global(html[data-theme="dark"]) .footerLink:hover {
+  color: #fff;
+}
+
+:global(html[data-theme="dark"]) .socialLink {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.45);
+}
+
+:global(html[data-theme="dark"]) .socialLink:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+:global(html[data-theme="dark"]) .footerDivider {
+  background: rgba(255, 255, 255, 0.06);
 }
 
 /* ── DARK THEME ── */
