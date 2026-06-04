@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   FaInstagram,
   FaFacebookF,
@@ -158,11 +159,12 @@ export default async function Home() {
                     {/* Image */}
                     {cover && (
                       <div className={styles.cardMedia} aria-hidden="true">
-                        <img
+                        <Image
                           src={cover}
                           alt=""
+                          fill
                           className={styles.cardImg}
-                          loading="lazy"
+                          sizes="(max-width: 720px) 100vw, 260px"
                         />
                       </div>
                     )}

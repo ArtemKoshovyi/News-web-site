@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import styles from "./category.module.css";
 import {
@@ -102,7 +103,13 @@ export default async function CategoryPage({
               <div className={styles.list}>
                 {news.map((item: NewsItem) => {
                   const dateLabel = formatUkDate(item.published_at);
-                  const cover = item.cover_image ? assetUrl(item.cover_image) : "";
+                  const cover = item.cover_image
+                    ? assetUrl(item.cover_image, {
+                        width: 520,
+                        quality: 72,
+                        fit: "cover",
+                      })
+                    : "";
 
                   return (
                     <article key={item.id} className={styles.card}>
@@ -146,11 +153,12 @@ export default async function CategoryPage({
                           className={styles.cardMedia}
                           aria-label={item.title}
                         >
-                          <img
+                          <Image
                             className={styles.cardImg}
                             src={cover}
                             alt=""
-                            loading="lazy"
+                            fill
+                            sizes="(max-width: 760px) 100vw, 300px"
                           />
                         </Link>
                       ) : (
