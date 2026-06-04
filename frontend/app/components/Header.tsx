@@ -13,7 +13,8 @@ import styles from "./Header.module.css";
 import type { Category } from "../../lib/directus";
 
 function categoryHref(cat: Category) {
-  return cat.slug ? `/category/${cat.slug}` : `/category/${cat.id}`;
+  const rawSlug = cat.slug ? String(cat.slug).trim() : String(cat.id);
+  return `/category/${encodeURIComponent(rawSlug.toLocaleLowerCase("uk-UA"))}`;
 }
 
 type Props = {
