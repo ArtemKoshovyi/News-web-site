@@ -39,13 +39,7 @@ export default function HomeHero({ hero, topList }: Props) {
 
   if (!selected) return null;
 
-  const bg = selected.cover_image
-    ? assetUrl(String(selected.cover_image), {
-        width: 1800,
-        quality: 72,
-        fit: "cover",
-      })
-    : "";
+  const bg = selected.cover_image ? assetUrl(String(selected.cover_image)) : "";
 
   return (
     <section className={styles.hero} aria-label="Головна новина">
@@ -57,6 +51,7 @@ export default function HomeHero({ hero, topList }: Props) {
             alt={selected.title}
             fill
             priority
+            unoptimized
             className={styles.heroBgImg}
             sizes="100vw"
           />

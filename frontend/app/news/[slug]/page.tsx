@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import styles from "./news.module.css";
 import { assetUrl, getNewsBySlug } from "../../../lib/directus";
 
@@ -62,12 +61,7 @@ export default async function Page({
     );
   }
 
-  const heroImg = item.cover_image
-    ? assetUrl(item.cover_image, { width: 1800, quality: 72, fit: "cover" })
-    : "";
-  const coverImg = item.cover_image
-    ? assetUrl(item.cover_image, { width: 1200, quality: 75, fit: "cover" })
-    : "";
+  const img = item.cover_image ? assetUrl(item.cover_image) : "";
   const categoryName = item.category?.name ?? "Новини";
   const date = formatDate(item.published_at);
 
@@ -75,16 +69,9 @@ export default async function Page({
     <main className={styles.page}>
       {/* ── ARTICLE HERO ── */}
       <section className={styles.hero}>
-        {heroImg && (
+        {img && (
           <div className={styles.heroBg} aria-hidden="true">
-            <Image
-              src={heroImg}
-              alt=""
-              fill
-              priority
-              className={styles.heroBgImg}
-              sizes="100vw"
-            />
+            <img src={img} alt="" className={styles.heroBgImg} />
           </div>
         )}
 
@@ -110,17 +97,9 @@ export default async function Page({
       {/* ── ARTICLE BODY ── */}
       <section className={styles.articleShell}>
         <article className={styles.article}>
-          {coverImg && (
+          {img && (
             <figure className={styles.coverWrap}>
-              <Image
-                className={styles.cover}
-                src={coverImg}
-                alt={item.title ?? ""}
-                width={1200}
-                height={720}
-                sizes="(max-width: 900px) 100vw, 760px"
-                priority
-              />
+              <img className={styles.cover} src={img} alt={item.title ?? ""} />
             </figure>
           )}
 

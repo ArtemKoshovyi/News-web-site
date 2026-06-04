@@ -29,22 +29,8 @@ export type PageItem = {
   status?: string | null;
 };
 
-const BASE_URL = (process.env.NEXT_PUBLIC_DIRECTUS_URL ?? "").replace(/\/$/, "");
+const BASE_URL = process.env.NEXT_PUBLIC_DIRECTUS_URL ?? "";
 const NEWS_COLLECTION = process.env.NEXT_PUBLIC_NEWS_COLLECTION ?? "News";
-const REVALIDATE_SECONDS = 300;
-
-const NEWS_LIST_FIELDS =
-  "id,title,slug,excerpt,published_at,cover_image,status,category.id,category.slug,category.name";
-
-const NEWS_ARTICLE_FIELDS =
-  "id,title,slug,excerpt,content,published_at,cover_image,status,category.id,category.slug,category.name";
-
-type AssetOptions = {
-  width?: number;
-  height?: number;
-  quality?: number;
-  fit?: string;
-};
 
 function buildUrl(path: string, params: Record<string, string> = {}) {
   if (!BASE_URL) {
@@ -70,7 +56,7 @@ function normalizeText(value?: string | null) {
 async function safeJson<T>(url: string): Promise<T | null> {
   try {
     const res = await fetch(url, {
-      next: { revalidate: REVALIDATE_SECONDS },
+      next: { revalidate: 60 },
       headers: {
         "Content-Type": "application/json",
       },
@@ -105,66 +91,26 @@ async function fetchItems<T>(
   return Array.isArray(json?.data) ? json.data : [];
 }
 
-export function assetUrl(fileId?: string | null, options: AssetOptions = {}) {
+export function assetUrl(
+  fileId?: string | null,
+  options?: { width?: number; height?: number; quality?: number; fit?: string }
+) {
   if (!fileId) return "/placeholder.jpg";
   if (!BASE_URL) return "/placeholder.jpg";
 
   const url = new URL(`/assets/${fileId}`, BASE_URL);
 
-  // Важливо: якщо не просити розмір, Directus може віддати оригінал на кілька MB.
-  const width = options.width ?? 1200;
-  const quality = options.quality ?? 75;
-  const fit = options.fit ?? "cover";
-
-  if (width) url.searchParams.set("width", String(width));
-  if (options.height) url.searchParams.set("height", String(options.height));
-  if (quality) url.searchParams.set("quality", String(quality));
-  if (fit) url.searchParams.set("fit", fit);
+  if (options?.width) url.searchParams.set("width", String(options.width));
+  if (options?.height) url.searchParams.set("height", String(options.height));
+  if (options?.quality) url.searchParams.set("quality", String(options.quality));
+  if (options?.fit) url.searchParams.set("fit", options.fit);
 
   return url.toString();
 }
 
-function optimizedAssetSrc(src: string, options: AssetOptions = {}) {
-  if (!src || !BASE_URL) return src;
-
-  try {
-    const url = new URL(src, BASE_URL);
-
-    if (!url.pathname.includes("/assets/")) {
-      return src;
-    }
-
-    const width = options.width ?? 1200;
-    const quality = options.quality ?? 75;
-    const fit = options.fit ?? "contain";
-
-    url.searchParams.set("width", String(width));
-    if (options.height) url.searchParams.set("height", String(options.height));
-    url.searchParams.set("quality", String(quality));
-    url.searchParams.set("fit", fit);
-
-    return url.toString();
-  } catch {
-    return src;
-  }
-}
-
-export function optimizeDirectusHtml(
-  html?: string | null,
-  options: AssetOptions = {}
-): string {
-  if (!html) return "";
-
-  return html.replace(
-    /(<img[^>]+src=["'])([^"']+)(["'][^>]*>)/gi,
-    (_, before: string, src: string, after: string) =>
-      `${before}${optimizedAssetSrc(src, options)}${after}`
-  );
-}
-
 export async function getHeroNews(): Promise<NewsItem | null> {
   const items = await fetchItems<NewsItem>(NEWS_COLLECTION, {
-    fields: NEWS_LIST_FIELDS,
+    fields: "id,title,slug,excerpt,published_at,cover_image,status,category.id,category.slug,category.name",
     "filter[is_hero][_eq]": "true",
     "filter[status][_eq]": "published",
     limit: "1",
@@ -175,7 +121,7 @@ export async function getHeroNews(): Promise<NewsItem | null> {
 
 export async function getTopNews(): Promise<NewsItem[]> {
   return fetchItems<NewsItem>(NEWS_COLLECTION, {
-    fields: NEWS_LIST_FIELDS,
+    fields: "id,title,slug,published_at,cover_image,status,category.id,category.slug,category.name",
     "filter[is_top][_eq]": "true",
     "filter[status][_eq]": "published",
     sort: "-published_at",
@@ -183,10 +129,21 @@ export async function getTopNews(): Promise<NewsItem[]> {
   });
 }
 
+// -------------------- МЕТОДЫ --------------------
+
 export async function getNewsList(): Promise<NewsItem[]> {
-  return fetchItems<NewsItem>(NEWS_COLLECTION, {
-    fields: NEWS_LIST_FIELDS,
+  const items = await fetchItems<NewsItem>(NEWS_COLLECTION, {
+    fields: "id,title,slug,excerpt,published_at,cover_image,status,category.id,category.slug,category.name",
     "filter[status][_eq]": "published",
+    sort: "-published_at",
+    limit: "20",
+  });
+
+  // Fallback, щоб головна не ставала порожньою, якщо Directus має проблему зі status-фільтром.
+  if (items.length) return items;
+
+  return fetchItems<NewsItem>(NEWS_COLLECTION, {
+    fields: "id,title,slug,excerpt,published_at,cover_image,status,category.id,category.slug,category.name",
     sort: "-published_at",
     limit: "20",
   });
@@ -194,7 +151,7 @@ export async function getNewsList(): Promise<NewsItem[]> {
 
 export async function getFeaturedNews(): Promise<NewsItem[]> {
   return fetchItems<NewsItem>(NEWS_COLLECTION, {
-    fields: NEWS_LIST_FIELDS,
+    fields: "id,title,slug,published_at,cover_image,status,category.id,category.slug,category.name",
     "filter[is_featured][_eq]": "true",
     "filter[status][_eq]": "published",
     sort: "-published_at",
@@ -206,31 +163,31 @@ export async function getNewsBySlug(slug: string): Promise<NewsItem | null> {
   const clean = decodeURIComponent(slug).trim();
 
   const items = await fetchItems<NewsItem>(NEWS_COLLECTION, {
-    fields: NEWS_ARTICLE_FIELDS,
+    fields: "id,title,slug,excerpt,content,published_at,cover_image,status,category.id,category.slug,category.name",
     "filter[slug][_eq]": clean,
     "filter[status][_eq]": "published",
     limit: "1",
   });
 
-  const item = items[0] ?? null;
-  if (!item) return null;
-
-  return {
-    ...item,
-    content: optimizeDirectusHtml(item.content, {
-      width: 1200,
-      quality: 75,
-      fit: "contain",
-    }),
-  };
+  return items[0] ?? null;
 }
 
 export async function getCategories(): Promise<Category[]> {
-  const categories = await fetchItems<Category>("categories", {
-    fields: "id,slug,name,description,status,sort",
-    sort: "sort,id",
+  // Важливо: не використовуємо поле sort, бо якщо його немає або Directus тимчасово падає,
+  // хедер залишається тільки з "Головна / Про нас". Беремо мінімальні стабільні поля.
+  let categories = await fetchItems<Category>("categories", {
+    fields: "id,slug,name,description,status",
+    sort: "id",
     limit: "100",
   });
+
+  // Додатковий fallback: якщо розширений запит не спрацював, пробуємо максимально простий.
+  if (!categories.length) {
+    categories = await fetchItems<Category>("categories", {
+      fields: "id,slug,name",
+      limit: "100",
+    });
+  }
 
   return categories.filter((cat) => cat.status !== "archived" && cat.status !== "draft");
 }
@@ -249,13 +206,25 @@ export async function getCategoryBySlug(slug: string): Promise<Category | null> 
 }
 
 export async function getNewsByCategory(categorySlug: string): Promise<NewsItem[]> {
-  const category = await getCategoryBySlug(categorySlug);
+  const clean = decodeURIComponent(categorySlug).trim();
+  const category = await getCategoryBySlug(clean);
 
-  if (!category) return [];
+  if (category) {
+    const byId = await fetchItems<NewsItem>(NEWS_COLLECTION, {
+      fields: "id,title,slug,excerpt,content,published_at,cover_image,status,category.id,category.slug,category.name",
+      "filter[category][_eq]": String(category.id),
+      "filter[status][_eq]": "published",
+      sort: "-published_at",
+      limit: "50",
+    });
 
+    if (byId.length) return byId;
+  }
+
+  // Fallback для старих/інших slug, наприклад Economic/Finanse тощо.
   return fetchItems<NewsItem>(NEWS_COLLECTION, {
-    fields: NEWS_LIST_FIELDS,
-    "filter[category][_eq]": String(category.id),
+    fields: "id,title,slug,excerpt,content,published_at,cover_image,status,category.id,category.slug,category.name",
+    "filter[category][slug][_eq]": clean,
     "filter[status][_eq]": "published",
     sort: "-published_at",
     limit: "50",
@@ -270,17 +239,7 @@ export async function getPageBySlug(slug: string): Promise<PageItem | null> {
     limit: "1",
   });
 
-  const page = items[0] ?? null;
-  if (!page) return null;
-
-  return {
-    ...page,
-    content: optimizeDirectusHtml(page.content, {
-      width: 1200,
-      quality: 75,
-      fit: "contain",
-    }),
-  };
+  return items[0] ?? null;
 }
 
 export async function searchNews(query: string): Promise<NewsItem[]> {
@@ -293,14 +252,14 @@ export async function searchNews(query: string): Promise<NewsItem[]> {
   if (!q) return [];
 
   const items = await fetchItems<NewsItem>(NEWS_COLLECTION, {
-    fields: NEWS_LIST_FIELDS,
+    fields: "id,title,slug,excerpt,content,published_at,cover_image,status,category.id,category.slug,category.name",
     "filter[status][_eq]": "published",
     sort: "-published_at",
     limit: "200",
   });
 
   const filtered = items.filter((n) => {
-    const hay = `${n.title ?? ""} ${n.excerpt ?? ""} ${n.category?.name ?? ""}`
+    const hay = `${n.title ?? ""} ${n.excerpt ?? ""} ${(n as any).content ?? ""}`
       .replace(/<[^>]*>/g, " ")
       .replace(/[^\p{L}\p{N}\s]+/gu, " ")
       .replace(/\s+/g, " ")
@@ -318,17 +277,7 @@ export async function getPage(): Promise<PageItem | null> {
     limit: "1",
   });
 
-  const page = items[0] ?? null;
-  if (!page) return null;
-
-  return {
-    ...page,
-    content: optimizeDirectusHtml(page.content, {
-      width: 1200,
-      quality: 75,
-      fit: "contain",
-    }),
-  };
+  return items[0] ?? null;
 }
 
 export type EventItem = {
@@ -362,22 +311,12 @@ export async function getEventBySlug(slug: string): Promise<EventItem | null> {
     fields: "id,title,slug,content,starts_at,status,cover_image,latitude,longitude",
   });
 
-  const event = items[0] ?? null;
-  if (!event) return null;
-
-  return {
-    ...event,
-    content: optimizeDirectusHtml(event.content, {
-      width: 1200,
-      quality: 75,
-      fit: "contain",
-    }),
-  };
+  return items[0] ?? null;
 }
 
-export function getAssetUrl(file: any, options: AssetOptions = {}): string | null {
+export function getAssetUrl(file: any): string | null {
   if (!file) return null;
   const id = typeof file === "string" ? file : file.id;
   if (!id || !BASE_URL) return null;
-  return assetUrl(String(id), options);
+  return `${BASE_URL}/assets/${id}`;
 }

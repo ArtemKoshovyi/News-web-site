@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import styles from "./events.module.css";
 import { getEvents, getAssetUrl } from "@/lib/directus";
 
@@ -15,11 +14,7 @@ export default async function EventsPage() {
       ) : (
         <div className={styles.list}>
           {events.map((e) => {
-            const cover = getAssetUrl(e.cover_image, {
-              width: 520,
-              quality: 72,
-              fit: "cover",
-            });
+            const cover = getAssetUrl(e.cover_image);
             return (
               <Link key={e.id} href={`/events/${e.slug}`} className={styles.card}>
                 <div className={styles.cardBody}>
@@ -31,14 +26,8 @@ export default async function EventsPage() {
 
                 {cover ? (
                   <div className={styles.media}>
-                    <Image
-                      src={cover}
-                      alt=""
-                      className={styles.img}
-                      width={520}
-                      height={390}
-                      sizes="(max-width: 600px) 100vw, 320px"
-                    />
+                    {/* звичайний img ок для початку */}
+                    <img src={cover} alt="" className={styles.img} />
                   </div>
                 ) : null}
               </Link>

@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import styles from "./event.module.css";
 import { getEventBySlug, getAssetUrl } from "@/lib/directus";
 
@@ -13,11 +12,7 @@ export default async function EventPage({
   const event = await getEventBySlug(slug);
   if (!event) notFound();
 
-  const cover = getAssetUrl(event.cover_image, {
-    width: 1200,
-    quality: 75,
-    fit: "cover",
-  });
+  const cover = getAssetUrl(event.cover_image);
 
   const mapSrc =
     event.latitude != null && event.longitude != null
@@ -32,17 +27,7 @@ export default async function EventPage({
 
       <h1 className={styles.h1}>{event.title}</h1>
 
-      {cover ? (
-        <Image
-          src={cover}
-          alt=""
-          className={styles.cover}
-          width={1200}
-          height={720}
-          sizes="(max-width: 900px) 100vw, 900px"
-          priority
-        />
-      ) : null}
+      {cover ? <img src={cover} alt="" className={styles.cover} /> : null}
 
       <div
         className={styles.content}
