@@ -53,25 +53,60 @@ function normalizeText(value?: string | null) {
     .replace(/^-+|-+$/g, "");
 }
 
-async function safeJson<T>(url: string): Promise<T | null> {
-  try {
-    const res = await fetch(url, {
-      next: { revalidate: 60 },
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+const DIRECTUS_TIMEOUT_MS = 12_000;
+const DIRECTUS_RETRIES = 3;
 
-    if (!res.ok) {
-      console.error(`Directus request failed: ${res.status} ${res.statusText} — ${url}`);
-      return null;
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function safeJson<T>(url: string): Promise<T | null> {
+  let lastError: unknown = null;
+
+  for (let attempt = 1; attempt <= DIRECTUS_RETRIES; attempt++) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), DIRECTUS_TIMEOUT_MS);
+
+    try {
+      const res = await fetch(url, {
+        cache: "no-store",
+        signal: controller.signal,
+        headers: {
+          Accept: "application/json",
+        },
+      });
+
+      clearTimeout(timeout);
+
+      if (!res.ok) {
+        lastError = new Error(`${res.status} ${res.statusText}`);
+        console.error(
+          `Directus request failed, attempt ${attempt}/${DIRECTUS_RETRIES}: ${res.status} ${res.statusText} — ${url}`
+        );
+
+        // 4xx usually means bad query/permissions, so retrying will not help.
+        if (res.status >= 400 && res.status < 500 && res.status !== 429) {
+          return null;
+        }
+      } else {
+        return (await res.json()) as T;
+      }
+    } catch (error) {
+      clearTimeout(timeout);
+      lastError = error;
+      console.error(
+        `Directus fetch failed, attempt ${attempt}/${DIRECTUS_RETRIES} — ${url}`,
+        error
+      );
     }
 
-    return (await res.json()) as T;
-  } catch (error) {
-    console.error(`Directus fetch failed — ${url}`, error);
-    return null;
+    if (attempt < DIRECTUS_RETRIES) {
+      await sleep(700 * attempt);
+    }
   }
+
+  console.error(`Directus failed after ${DIRECTUS_RETRIES} attempts — ${url}`, lastError);
+  return null;
 }
 
 async function fetchItems<T>(

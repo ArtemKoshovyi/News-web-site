@@ -18,6 +18,8 @@ import {
   type Category,
 } from "../lib/directus";
 
+export const dynamic = "force-dynamic";
+
 const DATE_LOCALE = "uk-UA";
 
 function formatDate(value?: string | null) {
